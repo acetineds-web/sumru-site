@@ -1,0 +1,2268 @@
+<!doctype html>
+<html lang="tr">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EBT 522 Mezunlar Platformu</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, #1e3a8a 0%, #312e81 50%, #1e293b 100%);
+    }
+
+    .nav-link {
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-link:hover {
+      transform: translateY(-2px);
+    }
+
+    .nav-link.active {
+      color: #fbbf24;
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #fbbf24;
+      border-radius: 2px;
+    }
+
+    .page-content {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .page-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    .mobile-menu {
+      display: none;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .mobile-menu.open {
+      display: block;
+      max-height: 800px;
+    }
+
+    .menu-icon {
+      cursor: pointer;
+    }
+
+    .feature-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .feature-card:hover {
+      transform: scale(1.05);
+    }
+
+    .toast-message {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(251, 191, 36, 0.95);
+      color: #1e3a8a;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .loading-spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid #fbbf24;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Harita Pan ve Zoom Stilleri */
+    #map-viewport {
+      position: relative;
+      overflow: hidden;
+    }
+
+    #map-viewport.grabbing {
+      cursor: grabbing !important;
+    }
+
+    #map-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    #turkey-map {
+      display: block;
+      max-width: none;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="gradient-bg">
+  <div class="w-full min-h-full"><!-- Header with Navigation -->
+   <header class="w-full bg-black bg-opacity-30 backdrop-blur-lg border-b border-white border-opacity-20 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+     <div class="flex justify-between items-center"><!-- Logo -->
+      <div class="flex items-center space-x-3">
+       <div class="w-12 h-12 bg-amber-400 rounded-lg flex items-center justify-center font-bold text-blue-900 text-xl">
+        EBT
+       </div><span id="site-title" class="text-white font-bold text-xl hidden md:block">EBT 522 Mezunlar Platformu</span>
+      </div><!-- Desktop Navigation -->
+      <nav class="hidden lg:flex items-center space-x-1"><a href="#" class="nav-link active text-white px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="anasayfa">Anasayfa</a> <a href="#" class="nav-link text-white px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="kayit">Kişi Kayıt</a> <a href="#" class="nav-link text-white px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="giris">Oturum Aç</a> <a href="#" class="nav-link text-white px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="forum">Forum</a> <a href="#" class="nav-link text-white px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="kisiler">Kişiler</a> <a href="#" class="nav-link text-white px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="fotograflar">Fotoğraflar</a> <a href="#" class="nav-link text-white px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="videolar">Videolar</a> <a href="#" class="nav-link text-white px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="kim-nerede">Kim, Nerede?</a> <a href="#" class="nav-link text-white px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="harita">Harita</a> <a href="#" id="admin-panel-link" class="nav-link text-amber-400 px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="admin" style="display: none;">👑 Admin Paneli</a> <button id="logout-btn" class="text-white px-4 py-2 rounded-lg hover:bg-red-500 hover:bg-opacity-20 transition" style="display: none;">🚪 Çıkış</button>
+      </nav><!-- Mobile Menu Button -->
+      <div class="lg:hidden menu-icon text-white text-3xl" id="mobile-menu-btn">
+       ☰
+      </div>
+     </div><!-- Mobile Navigation -->
+     <nav id="mobile-menu" class="mobile-menu lg:hidden mt-4">
+      <div class="flex flex-col space-y-2"><a href="#" class="nav-link-mobile text-white px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="anasayfa">Anasayfa</a> <a href="#" class="nav-link-mobile text-white px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="kayit">Kişi Kayıt</a> <a href="#" class="nav-link-mobile text-white px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="giris">Oturum Aç</a> <a href="#" class="nav-link-mobile text-white px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="forum">Forum</a> <a href="#" class="nav-link-mobile text-white px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="kisiler">Kişiler</a> <a href="#" class="nav-link-mobile text-white px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="fotograflar">Fotoğraflar</a> <a href="#" class="nav-link-mobile text-white px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="videolar">Videolar</a> <a href="#" class="nav-link-mobile text-white px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="kim-nerede">Kim, Nerede?</a> <a href="#" class="nav-link-mobile text-white px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="harita">Harita</a> <a href="#" id="admin-panel-link-mobile" class="nav-link-mobile text-amber-400 px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10" data-page="admin" style="display: none;">👑 Admin Paneli</a>
+      </div>
+     </nav>
+    </div>
+   </header><!-- Main Content Area -->
+   <main class="w-full px-6 py-12">
+    <div class="max-w-7xl mx-auto"><!-- Anasayfa -->
+     <div id="page-anasayfa" class="page-content active">
+      <div class="text-center mb-16">
+       <h1 id="welcome-title" class="text-5xl md:text-6xl font-bold text-white mb-6">Hoş Geldiniz</h1>
+       <p id="welcome-text" class="text-xl text-gray-300 max-w-3xl mx-auto">EBT 522 sınıfının dijital buluşma noktasına hoş geldiniz. Arkadaşlarınızla bağlantıda kalın, anıları paylaşın.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+       <div class="feature-card bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20" data-navigate="kisiler">
+        <div class="text-5xl mb-4">
+         👥
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-3">Kişiler</h3>
+        <p class="text-gray-300">Sınıf arkadaşlarını keşfet ve iletişime geç</p>
+       </div>
+       <div class="feature-card bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20" data-navigate="forum">
+        <div class="text-5xl mb-4">
+         💬
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-3">Forum</h3>
+        <p class="text-gray-300">Tartışmalara katıl, anıları paylaş</p>
+       </div>
+       <div class="feature-card bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20" data-navigate="fotograflar">
+        <div class="text-5xl mb-4">
+         📸
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-3">Fotoğraflar</h3>
+        <p class="text-gray-300">Anıları fotoğraflarla yaşat</p>
+       </div>
+       <div class="feature-card bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20" data-navigate="videolar">
+        <div class="text-5xl mb-4">
+         🎥
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-3">Videolar</h3>
+        <p class="text-gray-300">Video anıları izle ve paylaş</p>
+       </div>
+       <div class="feature-card bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20" data-navigate="kim-nerede">
+        <div class="text-5xl mb-4">
+         🌍
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-3">Kim, Nerede?</h3>
+        <p class="text-gray-300">Mezunların şu anki durumları</p>
+       </div>
+       <div class="feature-card bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20" data-navigate="harita">
+        <div class="text-5xl mb-4">
+         🗺️
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-3">Harita</h3>
+        <p class="text-gray-300">Mezunlar Türkiye'de nerede?</p>
+       </div>
+      </div>
+     </div><!-- Kişi Kayıt -->
+     <div id="page-kayit" class="page-content">
+      <div class="max-w-4xl mx-auto">
+       <h2 class="text-4xl font-bold text-white mb-8">Kişi Kayıt</h2>
+       <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20">
+        <form id="kayit-form" class="space-y-6"><!-- Kişisel Bilgiler -->
+         <div class="border-b border-white border-opacity-20 pb-6">
+          <h3 class="text-2xl font-bold text-amber-400 mb-4">Kişisel Bilgiler</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div><label for="ad-soyad" class="block text-white mb-2 font-semibold">Ad Soyad *</label> <input type="text" id="ad-soyad" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Adınız ve soyadınız">
+           </div>
+           <div><label for="email" class="block text-white mb-2 font-semibold">E-posta *</label> <input type="email" id="email" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="ornek@email.com">
+           </div>
+           <div><label for="sifre" class="block text-white mb-2 font-semibold">Şifre *</label> <input type="password" id="sifre" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="••••••••">
+           </div>
+           <div><label for="telefon" class="block text-white mb-2 font-semibold">Telefon</label> <input type="tel" id="telefon" class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="0555 123 45 67">
+           </div>
+           <div><label for="dogum-tarihi" class="block text-white mb-2 font-semibold">Doğum Tarihi</label> <input type="date" id="dogum-tarihi" class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400">
+           </div>
+           <div><label class="block text-white mb-2 font-semibold">Cinsiyet *</label>
+            <div class="flex space-x-6"><label class="flex items-center text-white cursor-pointer"> <input type="radio" name="cinsiyet" value="Erkek" required class="mr-2 w-5 h-5 text-amber-400 focus:ring-amber-400"> <span>Erkek</span> </label> <label class="flex items-center text-white cursor-pointer"> <input type="radio" name="cinsiyet" value="Kadın" required class="mr-2 w-5 h-5 text-amber-400 focus:ring-amber-400"> <span>Kadın</span> </label> <label class="flex items-center text-white cursor-pointer"> <input type="radio" name="cinsiyet" value="Diğer" required class="mr-2 w-5 h-5 text-amber-400 focus:ring-amber-400"> <span>Diğer</span> </label>
+            </div>
+           </div>
+          </div>
+         </div><!-- Profesyonel Bilgiler -->
+         <div class="border-b border-white border-opacity-20 pb-6">
+          <h3 class="text-2xl font-bold text-amber-400 mb-4">Profesyonel Bilgiler</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div><label for="meslek" class="block text-white mb-2 font-semibold">Meslek</label> <input type="text" id="meslek" class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Şu anki mesleğiniz">
+           </div>
+           <div><label for="sirket" class="block text-white mb-2 font-semibold">Şirket</label> <input type="text" id="sirket" class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Çalıştığınız şirket">
+           </div>
+           <div><label for="sehir" class="block text-white mb-2 font-semibold">Şehir *</label> <select id="sehir" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white focus:outline-none focus:ring-2 focus:ring-amber-400"> <option value="" class="bg-blue-900">Şehir seçiniz</option> <option value="İstanbul" class="bg-blue-900">İstanbul</option> <option value="Ankara" class="bg-blue-900">Ankara</option> <option value="İzmir" class="bg-blue-900">İzmir</option> <option value="Bursa" class="bg-blue-900">Bursa</option> <option value="Antalya" class="bg-blue-900">Antalya</option> <option value="Adana" class="bg-blue-900">Adana</option> <option value="Konya" class="bg-blue-900">Konya</option> <option value="Gaziantep" class="bg-blue-900">Gaziantep</option> <option value="Kayseri" class="bg-blue-900">Kayseri</option> <option value="Diğer" class="bg-blue-900">Diğer</option> </select>
+           </div>
+           <div><label for="sosyal-medya" class="block text-white mb-2 font-semibold">Sosyal Medya</label> <input type="text" id="sosyal-medya" class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="LinkedIn, Twitter, vb.">
+           </div>
+          </div>
+         </div><!-- Hobiler ve İlgi Alanları -->
+         <div class="border-b border-white border-opacity-20 pb-6">
+          <h3 class="text-2xl font-bold text-amber-400 mb-4">Hobiler ve İlgi Alanları</h3>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4"><label class="flex items-center text-white cursor-pointer"> <input type="checkbox" name="hobiler" value="Spor" class="mr-2 w-5 h-5 text-amber-400 rounded focus:ring-amber-400"> <span>Spor</span> </label> <label class="flex items-center text-white cursor-pointer"> <input type="checkbox" name="hobiler" value="Müzik" class="mr-2 w-5 h-5 text-amber-400 rounded focus:ring-amber-400"> <span>Müzik</span> </label> <label class="flex items-center text-white cursor-pointer"> <input type="checkbox" name="hobiler" value="Sinema" class="mr-2 w-5 h-5 text-amber-400 rounded focus:ring-amber-400"> <span>Sinema</span> </label> <label class="flex items-center text-white cursor-pointer"> <input type="checkbox" name="hobiler" value="Kitap" class="mr-2 w-5 h-5 text-amber-400 rounded focus:ring-amber-400"> <span>Kitap</span> </label> <label class="flex items-center text-white cursor-pointer"> <input type="checkbox" name="hobiler" value="Seyahat" class="mr-2 w-5 h-5 text-amber-400 rounded focus:ring-amber-400"> <span>Seyahat</span> </label> <label class="flex items-center text-white cursor-pointer"> <input type="checkbox" name="hobiler" value="Fotoğrafçılık" class="mr-2 w-5 h-5 text-amber-400 rounded focus:ring-amber-400"> <span>Fotoğrafçılık</span> </label> <label class="flex items-center text-white cursor-pointer"> <input type="checkbox" name="hobiler" value="Yemek" class="mr-2 w-5 h-5 text-amber-400 rounded focus:ring-amber-400"> <span>Yemek</span> </label> <label class="flex items-center text-white cursor-pointer"> <input type="checkbox" name="hobiler" value="Teknoloji" class="mr-2 w-5 h-5 text-amber-400 rounded focus:ring-amber-400"> <span>Teknoloji</span> </label> <label class="flex items-center text-white cursor-pointer"> <input type="checkbox" name="hobiler" value="Sanat" class="mr-2 w-5 h-5 text-amber-400 rounded focus:ring-amber-400"> <span>Sanat</span> </label>
+          </div>
+         </div><!-- Biyografi -->
+         <div class="border-b border-white border-opacity-20 pb-6">
+          <h3 class="text-2xl font-bold text-amber-400 mb-4">Hakkında</h3>
+          <div><label for="biyografi" class="block text-white mb-2 font-semibold">Biyografi</label> <textarea id="biyografi" rows="4" class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Kendiniz hakkında birkaç cümle yazın..."></textarea>
+          </div>
+         </div><!-- Tercihler -->
+         <div class="pb-6">
+          <h3 class="text-2xl font-bold text-amber-400 mb-4">Tercihler</h3>
+          <div class="space-y-3"><label class="flex items-start text-white cursor-pointer"> <input type="checkbox" id="haber-bulteni" name="haber-bulteni" class="mr-3 mt-1 w-5 h-5 text-amber-400 rounded focus:ring-amber-400"> <span>Haber bülteni ve etkinlik bildirimlerini almak istiyorum</span> </label> <label class="flex items-start text-white cursor-pointer"> <input type="checkbox" id="gizlilik" name="gizlilik" required class="mr-3 mt-1 w-5 h-5 text-amber-400 rounded focus:ring-amber-400"> <span>Gizlilik politikasını ve kullanım şartlarını okudum, kabul ediyorum *</span> </label>
+          </div>
+         </div><button type="submit" id="kayit-btn" class="w-full bg-amber-400 text-blue-900 px-6 py-4 rounded-lg font-bold text-lg hover:bg-amber-300 transition flex items-center justify-center"> Kayıt Ol </button>
+        </form>
+       </div>
+      </div>
+     </div><!-- Oturum Açma -->
+     <div id="page-giris" class="page-content">
+      <div class="max-w-md mx-auto">
+       <h2 class="text-4xl font-bold text-white mb-8">Oturum Aç</h2>
+       <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20">
+        <form id="giris-form" class="space-y-6">
+         <div><label for="giris-email" class="block text-white mb-2 font-semibold">E-posta</label> <input type="email" id="giris-email" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="ornek@email.com">
+         </div>
+         <div><label for="giris-sifre" class="block text-white mb-2 font-semibold">Şifre</label> <input type="password" id="giris-sifre" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="••••••••">
+         </div><button type="submit" class="w-full bg-amber-400 text-blue-900 px-6 py-4 rounded-lg font-bold text-lg hover:bg-amber-300 transition">Giriş Yap</button>
+        </form>
+       </div>
+      </div>
+     </div><!-- Admin Paneli -->
+     <div id="page-admin" class="page-content">
+      <h2 class="text-4xl font-bold text-white mb-8">👑 Admin Paneli</h2><!-- Kullanıcı Yönetimi -->
+      <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 mb-8">
+       <h3 class="text-2xl font-bold text-amber-400 mb-4">👥 Kullanıcı Yönetimi</h3>
+       <div class="overflow-x-auto">
+        <table class="w-full">
+         <thead class="bg-white bg-opacity-10">
+          <tr>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Ad Soyad</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Email</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Rol</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Kayıt Tarihi</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">İşlemler</th>
+          </tr>
+         </thead>
+         <tbody id="admin-users-tbody"><!-- Kullanıcılar buraya dinamik olarak eklenecek -->
+         </tbody>
+        </table>
+       </div>
+      </div><!-- Forum Mesaj Yönetimi -->
+      <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20">
+       <h3 class="text-2xl font-bold text-amber-400 mb-4">💬 Forum Mesaj Yönetimi</h3>
+       <div class="overflow-x-auto">
+        <table class="w-full">
+         <thead class="bg-white bg-opacity-10">
+          <tr>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Başlık</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Yazar</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Tarih</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">İşlemler</th>
+          </tr>
+         </thead>
+         <tbody id="admin-messages-tbody"><!-- Mesajlar buraya dinamik olarak eklenecek -->
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- Forum -->
+     <div id="page-forum" class="page-content">
+      <h2 class="text-4xl font-bold text-white mb-8">Forum (<span id="forum-mesaj-sayisi">0</span> Mesaj)</h2><!-- Yeni Mesaj Formu -->
+      <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 mb-8">
+       <h3 class="text-2xl font-bold text-amber-400 mb-4">Yeni Mesaj Paylaş</h3>
+       <form id="forum-form" class="space-y-4">
+        <div><label for="forum-yazar" class="block text-white mb-2 font-semibold">Adınız *</label> <input type="text" id="forum-yazar" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Adınız ve soyadınız">
+        </div>
+        <div><label for="forum-baslik" class="block text-white mb-2 font-semibold">Başlık *</label> <input type="text" id="forum-baslik" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Mesaj başlığı">
+        </div>
+        <div><label for="forum-mesaj" class="block text-white mb-2 font-semibold">Mesaj *</label> <textarea id="forum-mesaj" rows="4" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Mesajınızı yazın..."></textarea>
+        </div><button type="submit" id="forum-btn" class="bg-amber-400 text-blue-900 px-8 py-3 rounded-lg font-bold text-lg hover:bg-amber-300 transition flex items-center"> Mesajı Paylaş </button>
+       </form>
+      </div><!-- Mesaj Listesi Tablosu -->
+      <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl border border-white border-opacity-20 overflow-hidden">
+       <div class="overflow-x-auto">
+        <table class="w-full">
+         <thead class="bg-white bg-opacity-10">
+          <tr>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">#</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Başlık</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Yazar</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Tarih &amp; Saat</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Yorumlar</th>
+          </tr>
+         </thead>
+         <tbody id="forum-tbody"><!-- Mesajlar buraya dinamik olarak eklenecek -->
+         </tbody>
+        </table>
+       </div><!-- Sayfalama -->
+       <div class="px-6 py-4 bg-white bg-opacity-5 border-t border-white border-opacity-20">
+        <div class="flex items-center justify-between">
+         <div class="text-gray-300 text-sm">
+          Toplam <span id="toplam-mesaj">0</span> mesaj - Sayfa <span id="aktif-sayfa">1</span> / <span id="toplam-sayfa">1</span>
+         </div>
+         <div class="flex space-x-2" id="sayfalama-butonlari"><!-- Sayfalama butonları buraya dinamik olarak eklenecek -->
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Kişiler -->
+     <div id="page-kisiler" class="page-content">
+      <div class="mb-8">
+       <h2 class="text-4xl font-bold text-white mb-2">Kişiler</h2>
+       <p class="text-gray-300">Toplam <span id="kisi-sayisi" class="text-amber-400 font-bold">0</span> kayıtlı üye</p>
+      </div>
+      <div class="mb-6"><input type="text" id="kisi-arama" class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="🔍 İsim, meslek veya şehir ile ara...">
+      </div>
+      <div id="kisiler-listesi" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"><!-- Kişiler buraya dinamik olarak eklenecek -->
+      </div>
+     </div><!-- Kişi Detay Sayfası -->
+     <div id="page-kisi-detay" class="page-content">
+      <div class="mb-6"><button onclick="showPage('kisiler')" class="text-amber-400 hover:text-amber-300 flex items-center space-x-2 transition"> <span class="text-2xl">←</span> <span class="text-lg font-semibold">Kişiler Listesine Dön</span> </button>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8"><!-- Sol Kolon - Profil Bilgileri -->
+       <div class="lg:col-span-1">
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20 sticky top-24">
+         <div class="text-center mb-6">
+          <div id="detay-avatar" class="w-40 h-40 mx-auto bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center font-bold text-blue-900 text-6xl mb-4"><!-- Baş harfler buraya gelecek -->
+          </div>
+          <h2 id="detay-ad-soyad" class="text-3xl font-bold text-white mb-2"><!-- İsim buraya gelecek --></h2>
+          <p id="detay-sehir" class="text-amber-400 text-lg"><!-- Şehir buraya gelecek --></p>
+         </div>
+         <div id="detay-bilgiler" class="space-y-4"><!-- Detay bilgiler buraya dinamik olarak eklenecek -->
+         </div>
+        </div>
+       </div><!-- Sağ Kolon - Yorum Sistemi -->
+       <div class="lg:col-span-2"><!-- Yorum Ekleme Formu -->
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 mb-8">
+         <h3 class="text-2xl font-bold text-amber-400 mb-4">💬 Yorum Yap</h3>
+         <form id="yorum-form" class="space-y-4">
+          <div><label for="yorumcu-adi" class="block text-white mb-2 font-semibold">Adınız *</label> <input type="text" id="yorumcu-adi" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Adınız ve soyadınız">
+          </div>
+          <div><label for="yorum-metni" class="block text-white mb-2 font-semibold">Yorumunuz *</label> <textarea id="yorum-metni" rows="4" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Yorumunuzu yazın..."></textarea>
+          </div><button type="submit" id="yorum-btn" class="bg-amber-400 text-blue-900 px-8 py-3 rounded-lg font-bold text-lg hover:bg-amber-300 transition flex items-center"> Yorum Gönder </button>
+         </form>
+        </div><!-- Yorumlar Tablosu -->
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl border border-white border-opacity-20 overflow-hidden">
+         <div class="px-6 py-4 bg-white bg-opacity-10 border-b border-white border-opacity-20">
+          <h3 class="text-2xl font-bold text-white">Yorumlar (<span id="yorum-sayisi">0</span>)</h3>
+         </div>
+         <div class="overflow-x-auto">
+          <table class="w-full">
+           <thead class="bg-white bg-opacity-10">
+            <tr>
+             <th class="px-6 py-4 text-left text-amber-400 font-bold">#</th>
+             <th class="px-6 py-4 text-left text-amber-400 font-bold">Yorum</th>
+             <th class="px-6 py-4 text-left text-amber-400 font-bold">Yorumcu</th>
+             <th class="px-6 py-4 text-left text-amber-400 font-bold">Tarih &amp; Saat</th>
+            </tr>
+           </thead>
+           <tbody id="yorumlar-tbody"><!-- Yorumlar buraya dinamik olarak eklenecek -->
+           </tbody>
+          </table>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Fotoğraflar -->
+     <div id="page-fotograflar" class="page-content">
+      <div class="mb-8">
+       <h2 class="text-4xl font-bold text-white mb-2">Fotoğraf Galerisi</h2>
+       <p class="text-gray-300">Toplam <span id="fotograf-sayisi" class="text-amber-400 font-bold">0</span> fotoğraf</p>
+      </div><!-- Fotoğraf Ekleme Formu -->
+      <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 mb-8">
+       <h3 class="text-2xl font-bold text-amber-400 mb-4">📸 Yeni Fotoğraf Ekle</h3>
+       <form id="fotograf-form" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+         <div><label for="fotograf-baslik" class="block text-white mb-2 font-semibold">Başlık *</label> <input type="text" id="fotograf-baslik" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Fotoğraf başlığı">
+         </div>
+         <div><label for="fotograf-url" class="block text-white mb-2 font-semibold">Fotoğraf URL *</label> <input type="url" id="fotograf-url" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="https://example.com/foto.jpg">
+         </div>
+        </div>
+        <div><label for="fotograf-aciklama" class="block text-white mb-2 font-semibold">Açıklama</label> <textarea id="fotograf-aciklama" rows="2" class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Fotoğraf hakkında kısa açıklama..."></textarea>
+        </div>
+        <div><label for="fotograf-yukleyen" class="block text-white mb-2 font-semibold">Yükleyen *</label> <input type="text" id="fotograf-yukleyen" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Adınız ve soyadınız">
+        </div><button type="submit" id="fotograf-btn" class="bg-amber-400 text-blue-900 px-8 py-3 rounded-lg font-bold text-lg hover:bg-amber-300 transition flex items-center"> Fotoğraf Ekle </button>
+       </form>
+      </div><!-- Fotoğraf Galerisi -->
+      <div id="fotograflar-galerisi" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"><!-- Fotoğraflar buraya dinamik olarak eklenecek -->
+      </div>
+     </div><!-- Videolar -->
+     <div id="page-videolar" class="page-content">
+      <div class="mb-8">
+       <h2 class="text-4xl font-bold text-white mb-2">Video Galerisi</h2>
+       <p class="text-gray-300">Toplam <span id="video-sayisi" class="text-amber-400 font-bold">0</span> video</p>
+      </div><!-- Video Ekleme Formu -->
+      <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 mb-8">
+       <h3 class="text-2xl font-bold text-amber-400 mb-4">🎥 Yeni Video Ekle</h3>
+       <form id="video-form" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+         <div><label for="video-baslik" class="block text-white mb-2 font-semibold">Başlık *</label> <input type="text" id="video-baslik" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Video başlığı">
+         </div>
+         <div><label for="video-url" class="block text-white mb-2 font-semibold">Video URL (YouTube) *</label> <input type="url" id="video-url" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="https://www.youtube.com/watch?v=...">
+         </div>
+        </div>
+        <div><label for="video-thumbnail" class="block text-white mb-2 font-semibold">Thumbnail URL *</label> <input type="url" id="video-thumbnail" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="https://example.com/thumbnail.jpg">
+        </div>
+        <div><label for="video-aciklama" class="block text-white mb-2 font-semibold">Açıklama</label> <textarea id="video-aciklama" rows="2" class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Video hakkında kısa açıklama..."></textarea>
+        </div>
+        <div><label for="video-yukleyen" class="block text-white mb-2 font-semibold">Yükleyen *</label> <input type="text" id="video-yukleyen" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Adınız ve soyadınız">
+        </div><button type="submit" id="video-btn" class="bg-amber-400 text-blue-900 px-8 py-3 rounded-lg font-bold text-lg hover:bg-amber-300 transition flex items-center"> Video Ekle </button>
+       </form>
+      </div><!-- Video Galerisi -->
+      <div id="videolar-galerisi" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><!-- Videolar buraya dinamik olarak eklenecek -->
+      </div>
+     </div><!-- Video Detay Sayfası -->
+     <div id="page-video-detay" class="page-content">
+      <div class="mb-6"><button onclick="showPage('videolar')" class="text-amber-400 hover:text-amber-300 flex items-center space-x-2 transition"> <span class="text-2xl">←</span> <span class="text-lg font-semibold">Videolar Listesine Dön</span> </button>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8"><!-- Sol Kolon - Video Player -->
+       <div class="lg:col-span-2">
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 mb-8">
+         <h2 id="video-detay-baslik" class="text-3xl font-bold text-white mb-4"><!-- Video başlığı buraya gelecek --></h2><!-- Video Player -->
+         <div class="aspect-video bg-black rounded-lg overflow-hidden mb-4"><iframe id="video-player" class="w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+         </div><!-- Video Bilgileri -->
+         <div id="video-detay-bilgi" class="space-y-4"><!-- Video bilgileri buraya dinamik olarak eklenecek -->
+         </div>
+        </div><!-- Yorum Ekleme Formu -->
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 mb-8">
+         <h3 class="text-2xl font-bold text-amber-400 mb-4">💬 Yorum Yap</h3>
+         <form id="video-yorum-form" class="space-y-4">
+          <div><label for="video-yorumcu" class="block text-white mb-2 font-semibold">Adınız *</label> <input type="text" id="video-yorumcu" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Adınız ve soyadınız">
+          </div>
+          <div><label for="video-yorum-metni" class="block text-white mb-2 font-semibold">Yorumunuz *</label> <textarea id="video-yorum-metni" rows="4" required class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="Yorumunuzu yazın..."></textarea>
+          </div><button type="submit" id="video-yorum-btn" class="bg-amber-400 text-blue-900 px-8 py-3 rounded-lg font-bold text-lg hover:bg-amber-300 transition flex items-center"> Yorum Gönder </button>
+         </form>
+        </div><!-- Yorumlar Tablosu -->
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl border border-white border-opacity-20 overflow-hidden">
+         <div class="px-6 py-4 bg-white bg-opacity-10 border-b border-white border-opacity-20">
+          <h3 class="text-2xl font-bold text-white">Yorumlar (<span id="video-yorum-sayisi">0</span>)</h3>
+         </div>
+         <div class="overflow-x-auto">
+          <table class="w-full">
+           <thead class="bg-white bg-opacity-10">
+            <tr>
+             <th class="px-6 py-4 text-left text-amber-400 font-bold">#</th>
+             <th class="px-6 py-4 text-left text-amber-400 font-bold">Yorum</th>
+             <th class="px-6 py-4 text-left text-amber-400 font-bold">Yorumcu</th>
+             <th class="px-6 py-4 text-left text-amber-400 font-bold">Tarih &amp; Saat</th>
+            </tr>
+           </thead>
+           <tbody id="video-yorumlar-tbody"><!-- Yorumlar buraya dinamik olarak eklenecek -->
+           </tbody>
+          </table>
+         </div>
+        </div>
+       </div><!-- Sağ Kolon - İlgili Videolar -->
+       <div class="lg:col-span-1">
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 sticky top-24">
+         <h3 class="text-xl font-bold text-white mb-4">📹 İlgili Videolar</h3>
+         <div id="ilgili-videolar" class="space-y-4"><!-- İlgili videolar buraya dinamik olarak eklenecek -->
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Kim, Nerede, Ne Yapıyor -->
+     <div id="page-kim-nerede" class="page-content">
+      <h2 class="text-4xl font-bold text-white mb-8">Kim, Nerede, Ne Yapıyor?</h2>
+      <div class="mb-6"><input type="text" id="kim-nerede-arama" class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400" placeholder="🔍 İsim, meslek, şehir veya email ile ara...">
+      </div>
+      <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl border border-white border-opacity-20 overflow-hidden">
+       <div class="overflow-x-auto">
+        <table class="w-full">
+         <thead class="bg-white bg-opacity-10">
+          <tr>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">#</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Ad Soyad</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Email</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Telefon</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Meslek</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Şirket</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Şehir</th>
+           <th class="px-6 py-4 text-left text-amber-400 font-bold">Sosyal Medya</th>
+          </tr>
+         </thead>
+         <tbody id="kim-nerede-tbody"><!-- Kullanıcılar buraya dinamik olarak eklenecek -->
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- Harita -->
+     <div id="page-harita" class="page-content">
+      <h2 class="text-4xl font-bold text-white mb-8">Türkiye Haritası - İnteraktif Görünüm</h2><!-- Harita Kontrolleri -->
+      <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20 mb-6">
+       <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center space-x-4"><span class="text-white font-semibold">🔍 Zoom:</span> <button onclick="zoomIn()" class="bg-amber-400 text-blue-900 px-4 py-2 rounded-lg font-bold hover:bg-amber-300 transition"> ➕ Yakınlaştır </button> <button onclick="zoomOut()" class="bg-amber-400 text-blue-900 px-4 py-2 rounded-lg font-bold hover:bg-amber-300 transition"> ➖ Uzaklaştır </button> <button onclick="resetZoom()" class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg font-bold hover:bg-opacity-30 transition"> 🔄 Sıfırla </button>
+        </div>
+        <div class="text-white"><span class="font-semibold">Zoom Seviyesi:</span> <span id="zoom-level" class="text-amber-400 font-bold">100%</span>
+        </div>
+       </div>
+       <div class="mt-4 text-gray-300 text-sm">
+        💡 <strong>İpucu:</strong> Haritayı sürükleyerek hareket ettirebilir, zoom butonları ile yakınlaştırıp uzaklaştırabilirsiniz.
+       </div>
+      </div><!-- Harita Container -->
+      <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-4 border border-white border-opacity-20 mb-8">
+       <div id="map-viewport" class="relative overflow-hidden rounded-lg bg-gray-800" style="width: 100%; height: 600px; cursor: grab;">
+        <div id="map-container" class="absolute" style="transform-origin: 0 0; transition: transform 0.3s ease;"><img id="turkey-map" src="https://www.kgm.gov.tr/SiteCollectionImages/KGMimages/Haritalar/turistik.jpg" alt="Türkiye Haritası" draggable="false" style="display: block; user-select: none; pointer-events: none;" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-white text-xl\'>🗺️ Harita yüklenemedi</div>';">
+        </div>
+       </div>
+      </div><!-- Şehir İstatistikleri -->
+      <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20">
+       <h3 class="text-2xl font-bold text-white mb-6">📊 Mezunların Şehir Dağılımı</h3>
+       <div id="sehir-istatistikleri" class="grid grid-cols-2 md:grid-cols-4 gap-4"><!-- Şehir istatistikleri buraya dinamik olarak eklenecek -->
+       </div>
+      </div>
+     </div>
+    </div>
+   </main><!-- Footer -->
+   <footer class="w-full py-8 px-6 mt-20 border-t border-white border-opacity-20">
+    <div class="max-w-7xl mx-auto text-center text-gray-300">
+     <p class="mb-2">© 2025 EBT 522 Mezunlar Platformu</p>
+     <p class="text-sm italic text-amber-400">"Aynı sıralardan, farklı yollara..."</p>
+    </div>
+   </footer>
+  </div>
+  <script>
+    const defaultConfig = {
+      site_title: "EBT 522 Mezunlar Platformu",
+      welcome_title: "Hoş Geldiniz",
+      welcome_text: "EBT 522 sınıfının dijital buluşma noktasına hoş geldiniz. Arkadaşlarınızla bağlantıda kalın, anıları paylaşın.",
+      background_color: "#1e3a8a",
+      surface_color: "#ffffff1a",
+      text_color: "#ffffff",
+      primary_action_color: "#fbbf24",
+      secondary_action_color: "#d97706",
+      font_family: "Inter",
+      font_size: 16
+    };
+
+    let allUsers = [];
+    let allForumMessages = [];
+    let allComments = [];
+    let allPhotos = [];
+    let allPhotoTags = [];
+    let allPhotoComments = [];
+    let allVideos = [];
+    let allVideoComments = [];
+    let currentPage = 1;
+    let currentUser = null;
+    let currentPhoto = null;
+    let currentVideo = null;
+    let loggedInUser = null;
+    const messagesPerPage = 10;
+
+    // Harita Pan ve Zoom değişkenleri
+    let mapScale = 1;
+    let mapX = 0;
+    let mapY = 0;
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let initialMapX = 0;
+    let initialMapY = 0;
+
+    async function onConfigChange(config) {
+      const siteTitle = document.getElementById('site-title');
+      const welcomeTitle = document.getElementById('welcome-title');
+      const welcomeText = document.getElementById('welcome-text');
+
+      if (siteTitle) siteTitle.textContent = config.site_title || defaultConfig.site_title;
+      if (welcomeTitle) welcomeTitle.textContent = config.welcome_title || defaultConfig.welcome_title;
+      if (welcomeText) welcomeText.textContent = config.welcome_text || defaultConfig.welcome_text;
+
+      const bgColor = config.background_color || defaultConfig.background_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+
+      document.body.style.background = `linear-gradient(135deg, ${bgColor} 0%, #312e81 50%, #1e293b 100%)`;
+
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseFontStack = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+
+      const baseSize = config.font_size || defaultConfig.font_size;
+      if (welcomeTitle) welcomeTitle.style.fontSize = `${baseSize * 3.5}px`;
+      if (welcomeText) welcomeText.style.fontSize = `${baseSize * 1.25}px`;
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => {
+              config.background_color = value;
+              window.elementSdk.setConfig({ background_color: value });
+            }
+          },
+          {
+            get: () => config.surface_color || defaultConfig.surface_color,
+            set: (value) => {
+              config.surface_color = value;
+              window.elementSdk.setConfig({ surface_color: value });
+            }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              window.elementSdk.setConfig({ text_color: value });
+            }
+          },
+          {
+            get: () => config.primary_action_color || defaultConfig.primary_action_color,
+            set: (value) => {
+              config.primary_action_color = value;
+              window.elementSdk.setConfig({ primary_action_color: value });
+            }
+          },
+          {
+            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+            set: (value) => {
+              config.secondary_action_color = value;
+              window.elementSdk.setConfig({ secondary_action_color: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (value) => {
+            config.font_family = value;
+            window.elementSdk.setConfig({ font_family: value });
+          }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (value) => {
+            config.font_size = value;
+            window.elementSdk.setConfig({ font_size: value });
+          }
+        }
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["site_title", config.site_title || defaultConfig.site_title],
+        ["welcome_title", config.welcome_title || defaultConfig.welcome_title],
+        ["welcome_text", config.welcome_text || defaultConfig.welcome_text]
+      ]);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    // Data SDK initialization
+    const dataHandler = {
+      onDataChanged(data) {
+        // Verileri tipine göre ayır
+        const users = data.filter(item => item.type === 'user' || !item.type);
+        const forumMessages = data.filter(item => item.type === 'forum');
+        const comments = data.filter(item => item.type === 'comment');
+        const photos = data.filter(item => item.type === 'photo');
+        const photoTags = data.filter(item => item.type === 'photo_tag');
+        const photoComments = data.filter(item => item.type === 'photo_comment');
+        const videos = data.filter(item => item.type === 'video');
+        const videoComments = data.filter(item => item.type === 'video_comment');
+        
+        allUsers = users;
+        allForumMessages = forumMessages;
+        allComments = comments;
+        allPhotos = photos;
+        allPhotoTags = photoTags;
+        allPhotoComments = photoComments;
+        allVideos = videos;
+        allVideoComments = videoComments;
+        
+        renderKisiler(users);
+        renderKimNerede(users);
+        renderHarita(users);
+        updateKisiSayisi(users.length);
+        renderForumMessages(forumMessages, currentPage);
+        renderFotograflar(photos);
+        renderVideolar(videos);
+        
+        // Admin paneli güncelle
+        if (loggedInUser && loggedInUser.is_admin) {
+          renderAdminUsers(users);
+          renderAdminMessages(forumMessages);
+        }
+        
+        // Eğer kişi detay sayfasındaysak yorumları güncelle
+        if (currentUser) {
+          renderComments(currentUser.id);
+        }
+        
+        // Eğer fotoğraf detay sayfasındaysak etiket ve yorumları güncelle
+        if (currentPhoto) {
+          renderPhotoTags(currentPhoto.id);
+          renderPhotoComments(currentPhoto.id);
+        }
+        
+        // Eğer video detay sayfasındaysak yorumları güncelle
+        if (currentVideo) {
+          renderVideoComments(currentVideo.id);
+          renderIlgiliVideolar(currentVideo.id);
+        }
+        
+        // İlk yüklemede örnek mesajlar ekle
+        if (forumMessages.length === 0 && !window.ornekMesajlarEklendi) {
+          window.ornekMesajlarEklendi = true;
+          addOrnekMesajlar();
+        }
+      }
+    };
+
+    async function addOrnekMesajlar() {
+      const baseTime = 1704067200000;
+      const ornekMesajlar = [
+        {
+          id: 'forum_sample_1',
+          type: 'forum',
+          yazar: 'Ahmet Yılmaz',
+          baslik: '20. Yıl Buluşması Organizasyonu',
+          mesaj: 'Merhaba arkadaşlar! Mezuniyetimizin 20. yılı yaklaşıyor. Bu özel günü birlikte kutsamak için bir buluşma organize etmeyi düşünüyorum. İstanbul\'da bir restoranda toplanabiliriz. Katılmak isteyenler var mı?',
+          mesaj_tarihi: new Date(baseTime - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          yorum_sayisi: 15
+        },
+        {
+          id: 'forum_sample_2',
+          type: 'forum',
+          yazar: 'Zeynep Kaya',
+          baslik: 'Eski Fotoğrafları Paylaşalım',
+          mesaj: 'Arşivlerimde mezuniyet töreninden ve kampüs günlerinden çok güzel fotoğraflar buldum. Hepinizin de eski fotoğrafları vardır mutlaka. Gelin hep birlikte paylaşalım, anıları tazelemiş oluruz! 📸',
+          mesaj_tarihi: new Date(baseTime - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          yorum_sayisi: 23
+        },
+        {
+          id: 'forum_sample_3',
+          type: 'forum',
+          yazar: 'Mehmet Demir',
+          baslik: 'Hocalarımızdan Kim Kimle İletişimde?',
+          mesaj: 'Mezun olalı uzun zaman oldu ama hocalarımızı hiç unutmadım. Özellikle Prof. Dr. Ayşe Hanım ve Doç. Dr. Mustafa Bey\'le iletişimde olan var mı? Onlara da bir selam göndermek isterim.',
+          mesaj_tarihi: new Date(baseTime - 7 * 24 * 60 * 60 * 1000).toISOString(),
+          yorum_sayisi: 8
+        },
+        {
+          id: 'forum_sample_4',
+          type: 'forum',
+          yazar: 'Ayşe Şahin',
+          baslik: 'Kariyer Gelişimi ve Networking',
+          mesaj: 'Merhaba değerli arkadaşlar, şu an teknoloji sektöründe çalışıyorum ve yeni projeler için ekip arkadaşları arıyorum. Aynı zamanda farklı sektörlerdeki arkadaşlarımızla networking yapmak da çok güzel olur. Herkes ne yapıyor, paylaşalım mı?',
+          mesaj_tarihi: new Date(baseTime - 10 * 24 * 60 * 60 * 1000).toISOString(),
+          yorum_sayisi: 12
+        },
+        {
+          id: 'forum_sample_5',
+          type: 'forum',
+          yazar: 'Can Özdemir',
+          baslik: 'Kampüsteki Değişiklikleri Gördünüz mü?',
+          mesaj: 'Geçen hafta üniversiteye uğradım, kampüs çok değişmiş! Yeni kütüphane binası harika olmuş. Bizim zamanımızda yoktu bunlar 😊 Yakın zamanda giden var mı, ne düşünüyorsunuz?',
+          mesaj_tarihi: new Date(baseTime - 12 * 24 * 60 * 60 * 1000).toISOString(),
+          yorum_sayisi: 19
+        },
+        {
+          id: 'forum_sample_6',
+          type: 'forum',
+          yazar: 'Elif Yıldız',
+          baslik: 'Yurtdışında Yaşayan Arkadaşlar',
+          mesaj: 'Ben 5 yıldır Almanya\'da yaşıyorum. Yurtdışında yaşayan başka arkadaşlar var mı? Belki farklı ülkelerde bir araya gelebiliriz. Avrupa\'da olanlar için Berlin\'de bir buluşma organize edebiliriz!',
+          mesaj_tarihi: new Date(baseTime - 15 * 24 * 60 * 60 * 1000).toISOString(),
+          yorum_sayisi: 7
+        },
+        {
+          id: 'forum_sample_7',
+          type: 'forum',
+          yazar: 'Burak Arslan',
+          baslik: 'Mezuniyet Projelerimizi Hatırlıyor musunuz?',
+          mesaj: 'Bizim grup olarak yaptığımız o çılgın proje aklıma geldi bugün 😄 Geceler boyu laboratuvarda kalmıştık. Sizin projeleriniz nasıldı, paylaşır mısınız? O günleri özledim vallahi!',
+          mesaj_tarihi: new Date(baseTime - 18 * 24 * 60 * 60 * 1000).toISOString(),
+          yorum_sayisi: 31
+        },
+        {
+          id: 'forum_sample_8',
+          type: 'forum',
+          yazar: 'Selin Aydın',
+          baslik: 'Sosyal Sorumluluk Projesi Önerisi',
+          mesaj: 'Merhaba arkadaşlar, sınıf olarak bir sosyal sorumluluk projesi başlatsak nasıl olur? Üniversitemize burs fonu oluşturabiliriz veya ihtiyaç sahibi öğrencilere destek olabiliriz. Fikir ve önerilerinizi bekliyorum!',
+          mesaj_tarihi: new Date(baseTime - 20 * 24 * 60 * 60 * 1000).toISOString(),
+          yorum_sayisi: 14
+        }
+      ];
+
+      for (let i = 0; i < ornekMesajlar.length; i++) {
+        const result = await window.dataSdk.create(ornekMesajlar[i]);
+        if (!result.isOk) {
+          console.error('Örnek mesaj eklenemedi:', ornekMesajlar[i].id);
+        }
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+    }
+
+    async function initDataSdk() {
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          console.error("Data SDK başlatılamadı");
+        }
+      }
+    }
+
+    initDataSdk();
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast-message';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    function updateKisiSayisi(count) {
+      const kisiSayisi = document.getElementById('kisi-sayisi');
+      if (kisiSayisi) {
+        kisiSayisi.textContent = count;
+      }
+    }
+
+    function renderKisiler(users) {
+      const container = document.getElementById('kisiler-listesi');
+      if (!container) return;
+
+      if (users.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-12">
+            <div class="text-6xl mb-4">👥</div>
+            <p class="text-gray-300 text-lg">Henüz kayıtlı üye bulunmuyor.</p>
+            <p class="text-gray-400 text-sm mt-2">İlk üye olmak için kayıt olun!</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = users.map(user => {
+        const initials = user.ad_soyad.split(' ').map(n => n[0]).join('').toUpperCase();
+        return `
+          <div class="card-hover bg-white bg-opacity-10 backdrop-blur-lg rounded-xl border border-white border-opacity-20 overflow-hidden cursor-pointer group" data-user-id="${user.id}">
+            <div class="aspect-square bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+              <div class="text-5xl font-bold text-blue-900 group-hover:scale-110 transition-transform">${initials}</div>
+            </div>
+            <div class="p-3 text-center">
+              <h3 class="text-sm font-bold text-white mb-1 truncate" title="${user.ad_soyad}">${user.ad_soyad}</h3>
+              <p class="text-xs text-amber-400 truncate" title="${user.sehir}">📍 ${user.sehir}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Kişi kartlarına tıklama olayı ekle
+      container.querySelectorAll('.card-hover').forEach((card) => {
+        card.addEventListener('click', () => {
+          const userId = card.getAttribute('data-user-id');
+          const user = allUsers.find(u => u.id === userId);
+          if (user) {
+            showKisiDetay(user);
+          }
+        });
+      });
+    }
+
+    function showKisiDetay(user) {
+      currentUser = user;
+      const initials = user.ad_soyad.split(' ').map(n => n[0]).join('').toUpperCase();
+      
+      // Avatar güncelle
+      const avatar = document.getElementById('detay-avatar');
+      avatar.textContent = initials;
+      
+      // İsim ve şehir güncelle
+      document.getElementById('detay-ad-soyad').textContent = user.ad_soyad;
+      document.getElementById('detay-sehir').textContent = `📍 ${user.sehir}`;
+      
+      // Detay bilgileri güncelle
+      const detayBilgiler = document.getElementById('detay-bilgiler');
+      let bilgilerHTML = '';
+      
+      if (user.meslek) {
+        bilgilerHTML += `
+          <div class="bg-white bg-opacity-10 rounded-lg p-4">
+            <div class="text-amber-400 font-semibold mb-1">💼 Meslek</div>
+            <div class="text-white">${user.meslek}${user.sirket ? ' @ ' + user.sirket : ''}</div>
+          </div>
+        `;
+      }
+      
+      if (user.email) {
+        bilgilerHTML += `
+          <div class="bg-white bg-opacity-10 rounded-lg p-4">
+            <div class="text-amber-400 font-semibold mb-1">📧 E-posta</div>
+            <div class="text-white">${user.email}</div>
+          </div>
+        `;
+      }
+      
+      if (user.telefon) {
+        bilgilerHTML += `
+          <div class="bg-white bg-opacity-10 rounded-lg p-4">
+            <div class="text-amber-400 font-semibold mb-1">📱 Telefon</div>
+            <div class="text-white">${user.telefon}</div>
+          </div>
+        `;
+      }
+      
+      if (user.dogum_tarihi) {
+        bilgilerHTML += `
+          <div class="bg-white bg-opacity-10 rounded-lg p-4">
+            <div class="text-amber-400 font-semibold mb-1">🎂 Doğum Tarihi</div>
+            <div class="text-white">${new Date(user.dogum_tarihi).toLocaleDateString('tr-TR')}</div>
+          </div>
+        `;
+      }
+      
+      if (user.cinsiyet) {
+        bilgilerHTML += `
+          <div class="bg-white bg-opacity-10 rounded-lg p-4">
+            <div class="text-amber-400 font-semibold mb-1">👤 Cinsiyet</div>
+            <div class="text-white">${user.cinsiyet}</div>
+          </div>
+        `;
+      }
+      
+      if (user.hobiler) {
+        bilgilerHTML += `
+          <div class="bg-white bg-opacity-10 rounded-lg p-4">
+            <div class="text-amber-400 font-semibold mb-1">🎯 Hobiler</div>
+            <div class="text-white">${user.hobiler}</div>
+          </div>
+        `;
+      }
+      
+      if (user.biyografi) {
+        bilgilerHTML += `
+          <div class="bg-white bg-opacity-10 rounded-lg p-4">
+            <div class="text-amber-400 font-semibold mb-1">📝 Hakkında</div>
+            <div class="text-white">${user.biyografi}</div>
+          </div>
+        `;
+      }
+      
+      if (user.sosyal_medya) {
+        bilgilerHTML += `
+          <div class="bg-white bg-opacity-10 rounded-lg p-4">
+            <div class="text-amber-400 font-semibold mb-1">🌐 Sosyal Medya</div>
+            <div class="text-white">${user.sosyal_medya}</div>
+          </div>
+        `;
+      }
+      
+      detayBilgiler.innerHTML = bilgilerHTML;
+      
+      // Yorumları render et
+      renderComments(user.id);
+      
+      // Sayfayı göster
+      showPage('kisi-detay');
+    }
+
+    function renderComments(userId) {
+      const userComments = allComments.filter(c => c.kisi_id === userId);
+      const tbody = document.getElementById('yorumlar-tbody');
+      const yorumSayisi = document.getElementById('yorum-sayisi');
+      
+      if (!tbody || !yorumSayisi) return;
+      
+      yorumSayisi.textContent = userComments.length;
+      
+      if (userComments.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="px-6 py-12 text-center">
+              <div class="text-6xl mb-4">💬</div>
+              <p class="text-gray-300 text-lg">Henüz yorum yapılmamış.</p>
+              <p class="text-gray-400 text-sm mt-2">İlk yorumu siz yapın!</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      // Yorumları tarihe göre sırala (en yeni en üstte)
+      const sortedComments = [...userComments].sort((a, b) => 
+        new Date(b.yorum_tarihi) - new Date(a.yorum_tarihi)
+      );
+      
+      tbody.innerHTML = sortedComments.map((comment, index) => `
+        <tr class="border-t border-white border-opacity-10 hover:bg-white hover:bg-opacity-5 transition">
+          <td class="px-6 py-4 text-white font-semibold">${index + 1}</td>
+          <td class="px-6 py-4">
+            <div class="text-white">${comment.yorum}</div>
+          </td>
+          <td class="px-6 py-4 text-gray-300">${comment.yorumcu}</td>
+          <td class="px-6 py-4 text-gray-300 text-sm">${formatTarihSaat(comment.yorum_tarihi)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderKimNerede(users) {
+      const tbody = document.getElementById('kim-nerede-tbody');
+      if (!tbody) return;
+
+      if (users.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="px-6 py-12 text-center">
+              <div class="text-6xl mb-4">🌍</div>
+              <p class="text-gray-300 text-lg">Henüz kayıtlı üye bulunmuyor.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = users.map((user, index) => `
+        <tr class="border-t border-white border-opacity-10 hover:bg-white hover:bg-opacity-5 transition cursor-pointer" onclick="showKisiDetay(${JSON.stringify(user).replace(/"/g, '&quot;')})">
+          <td class="px-6 py-4 text-white font-semibold">${index + 1}</td>
+          <td class="px-6 py-4 text-white font-bold">${user.ad_soyad}</td>
+          <td class="px-6 py-4 text-gray-300">${user.email || '-'}</td>
+          <td class="px-6 py-4 text-gray-300">${user.telefon || '-'}</td>
+          <td class="px-6 py-4 text-gray-300">${user.meslek || '-'}</td>
+          <td class="px-6 py-4 text-gray-300">${user.sirket || '-'}</td>
+          <td class="px-6 py-4 text-amber-400">${user.sehir}</td>
+          <td class="px-6 py-4 text-gray-300">${user.sosyal_medya || '-'}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Kim, Nerede arama fonksiyonu
+    const kimNeredeArama = document.getElementById('kim-nerede-arama');
+    if (kimNeredeArama) {
+      kimNeredeArama.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredUsers = allUsers.filter(user => 
+          user.ad_soyad.toLowerCase().includes(searchTerm) ||
+          (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+          (user.meslek && user.meslek.toLowerCase().includes(searchTerm)) ||
+          user.sehir.toLowerCase().includes(searchTerm) ||
+          (user.sirket && user.sirket.toLowerCase().includes(searchTerm))
+        );
+        renderKimNerede(filteredUsers);
+      });
+    }
+
+    function renderHarita(users) {
+      const container = document.getElementById('sehir-istatistikleri');
+      if (!container) return;
+
+      if (users.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-6">
+            <p class="text-gray-300">Henüz veri bulunmuyor</p>
+          </div>
+        `;
+        return;
+      }
+
+      const sehirSayilari = {};
+      users.forEach(user => {
+        sehirSayilari[user.sehir] = (sehirSayilari[user.sehir] || 0) + 1;
+      });
+
+      const sortedSehirler = Object.entries(sehirSayilari)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8);
+
+      container.innerHTML = sortedSehirler.map(([sehir, sayi]) => `
+        <div class="text-center">
+          <div class="text-3xl font-bold text-amber-400">${sayi}</div>
+          <div class="text-gray-300">${sehir}</div>
+        </div>
+      `).join('');
+    }
+
+    // Harita Pan ve Zoom Fonksiyonları
+    function initMap() {
+      const viewport = document.getElementById('map-viewport');
+      const container = document.getElementById('map-container');
+      const mapImg = document.getElementById('turkey-map');
+
+      if (!viewport || !container || !mapImg) return;
+
+      // Harita yüklendikten sonra boyutları ayarla
+      mapImg.onload = function() {
+        const imgWidth = mapImg.naturalWidth;
+        const imgHeight = mapImg.naturalHeight;
+        const viewportWidth = viewport.clientWidth;
+        const viewportHeight = viewport.clientHeight;
+
+        // Haritayı viewport'a sığdır
+        const scaleX = viewportWidth / imgWidth;
+        const scaleY = viewportHeight / imgHeight;
+        mapScale = Math.min(scaleX, scaleY, 1);
+
+        // Haritayı ortala
+        mapX = (viewportWidth - imgWidth * mapScale) / 2;
+        mapY = (viewportHeight - imgHeight * mapScale) / 2;
+
+        updateMapTransform();
+      };
+
+      // Mouse olayları
+      viewport.addEventListener('mousedown', startDrag);
+      viewport.addEventListener('mousemove', drag);
+      viewport.addEventListener('mouseup', endDrag);
+      viewport.addEventListener('mouseleave', endDrag);
+
+      // Touch olayları (mobil)
+      viewport.addEventListener('touchstart', handleTouchStart);
+      viewport.addEventListener('touchmove', handleTouchMove);
+      viewport.addEventListener('touchend', endDrag);
+    }
+
+    function startDrag(e) {
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      initialMapX = mapX;
+      initialMapY = mapY;
+      document.getElementById('map-viewport').style.cursor = 'grabbing';
+      document.getElementById('map-viewport').classList.add('grabbing');
+    }
+
+    function drag(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      mapX = initialMapX + dx;
+      mapY = initialMapY + dy;
+
+      updateMapTransform();
+    }
+
+    function endDrag() {
+      isDragging = false;
+      document.getElementById('map-viewport').style.cursor = 'grab';
+      document.getElementById('map-viewport').classList.remove('grabbing');
+    }
+
+    function handleTouchStart(e) {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        initialMapX = mapX;
+        initialMapY = mapY;
+      }
+    }
+
+    function handleTouchMove(e) {
+      if (!isDragging || e.touches.length !== 1) return;
+      e.preventDefault();
+
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+
+      mapX = initialMapX + dx;
+      mapY = initialMapY + dy;
+
+      updateMapTransform();
+    }
+
+    function zoomIn() {
+      mapScale = Math.min(mapScale * 1.2, 3);
+      updateMapTransform();
+      updateZoomLevel();
+    }
+
+    function zoomOut() {
+      mapScale = Math.max(mapScale / 1.2, 0.5);
+      updateMapTransform();
+      updateZoomLevel();
+    }
+
+    function resetZoom() {
+      const viewport = document.getElementById('map-viewport');
+      const mapImg = document.getElementById('turkey-map');
+
+      if (!viewport || !mapImg) return;
+
+      const imgWidth = mapImg.naturalWidth;
+      const imgHeight = mapImg.naturalHeight;
+      const viewportWidth = viewport.clientWidth;
+      const viewportHeight = viewport.clientHeight;
+
+      const scaleX = viewportWidth / imgWidth;
+      const scaleY = viewportHeight / imgHeight;
+      mapScale = Math.min(scaleX, scaleY, 1);
+
+      mapX = (viewportWidth - imgWidth * mapScale) / 2;
+      mapY = (viewportHeight - imgHeight * mapScale) / 2;
+
+      updateMapTransform();
+      updateZoomLevel();
+    }
+
+    function updateMapTransform() {
+      const container = document.getElementById('map-container');
+      if (!container) return;
+
+      container.style.transform = `translate(${mapX}px, ${mapY}px) scale(${mapScale})`;
+    }
+
+    function updateZoomLevel() {
+      const zoomLevelSpan = document.getElementById('zoom-level');
+      if (zoomLevelSpan) {
+        zoomLevelSpan.textContent = Math.round(mapScale * 100) + '%';
+      }
+    }
+
+    // Global fonksiyonlar
+    window.zoomIn = zoomIn;
+    window.zoomOut = zoomOut;
+    window.resetZoom = resetZoom;
+
+    // Sayfa yüklendiğinde haritayı başlat
+    window.addEventListener('load', initMap);
+
+    function renderFotograflar(photos) {
+      const container = document.getElementById('fotograflar-galerisi');
+      const fotografSayisi = document.getElementById('fotograf-sayisi');
+      
+      if (!container) return;
+      
+      if (fotografSayisi) {
+        fotografSayisi.textContent = photos.length;
+      }
+
+      if (photos.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-12">
+            <div class="text-6xl mb-4">📸</div>
+            <p class="text-gray-300 text-lg">Henüz fotoğraf eklenmemiş.</p>
+            <p class="text-gray-400 text-sm mt-2">İlk fotoğrafı siz ekleyin!</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Fotoğrafları tarihe göre sırala (en yeni en üstte)
+      const sortedPhotos = [...photos].sort((a, b) => 
+        new Date(b.yuklenme_tarihi) - new Date(a.yuklenme_tarihi)
+      );
+
+      container.innerHTML = sortedPhotos.map(photo => `
+        <div class="card-hover bg-white bg-opacity-10 backdrop-blur-lg rounded-xl border border-white border-opacity-20 overflow-hidden cursor-pointer group" onclick="showFotografDetay('${photo.id}')">
+          <div class="aspect-square bg-white bg-opacity-20 overflow-hidden relative">
+            <img src="${photo.fotograf_url}" alt="${photo.baslik}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onerror="this.src=''; this.style.display='none'; this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center text-6xl\\'>📷</div>';">
+          </div>
+          <div class="p-3">
+            <h3 class="text-sm font-bold text-white mb-1 truncate" title="${photo.baslik}">${photo.baslik}</h3>
+            <p class="text-xs text-amber-400 truncate" title="${photo.yukleyen}">👤 ${photo.yukleyen}</p>
+            <p class="text-xs text-gray-400 mt-1">${new Date(photo.yuklenme_tarihi).toLocaleDateString('tr-TR')}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderVideolar(videos) {
+      const container = document.getElementById('videolar-galerisi');
+      const videoSayisi = document.getElementById('video-sayisi');
+      
+      if (!container) return;
+      
+      if (videoSayisi) {
+        videoSayisi.textContent = videos.length;
+      }
+
+      if (videos.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-12">
+            <div class="text-6xl mb-4">🎥</div>
+            <p class="text-gray-300 text-lg">Henüz video eklenmemiş.</p>
+            <p class="text-gray-400 text-sm mt-2">İlk videoyu siz ekleyin!</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Videoları tarihe göre sırala (en yeni en üstte)
+      const sortedVideos = [...videos].sort((a, b) => 
+        new Date(b.yuklenme_tarihi) - new Date(a.yuklenme_tarihi)
+      );
+
+      container.innerHTML = sortedVideos.map(video => `
+        <div class="card-hover bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl border border-white border-opacity-20 overflow-hidden cursor-pointer group" onclick="showVideoDetay('${video.id}')">
+          <div class="aspect-video bg-white bg-opacity-20 overflow-hidden relative">
+            <img src="${video.thumbnail_url}" alt="${video.baslik}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onerror="this.src=''; this.style.display='none'; this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center text-6xl\\'>🎬</div>';">
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <div class="w-16 h-16 bg-amber-400 rounded-full flex items-center justify-center">
+                <div class="w-0 h-0 border-t-8 border-t-transparent border-l-12 border-l-blue-900 border-b-8 border-b-transparent ml-1"></div>
+              </div>
+            </div>
+          </div>
+          <div class="p-4">
+            <h3 class="text-lg font-bold text-white mb-2 line-clamp-2" title="${video.baslik}">${video.baslik}</h3>
+            <p class="text-xs text-amber-400 mb-1" title="${video.yukleyen}">👤 ${video.yukleyen}</p>
+            <p class="text-xs text-gray-400">${new Date(video.yuklenme_tarihi).toLocaleDateString('tr-TR')}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function getYouTubeEmbedUrl(url) {
+      // YouTube URL'lerini embed formatına çevir
+      let videoId = '';
+      
+      if (url.includes('youtube.com/watch?v=')) {
+        videoId = url.split('v=')[1].split('&')[0];
+      } else if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1].split('?')[0];
+      } else if (url.includes('youtube.com/embed/')) {
+        return url;
+      }
+      
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+      
+      return url;
+    }
+
+    function showVideoDetay(videoId) {
+      const video = allVideos.find(v => v.id === videoId);
+      if (!video) return;
+
+      currentVideo = video;
+
+      // Başlık güncelle
+      document.getElementById('video-detay-baslik').textContent = video.baslik;
+      
+      // Video player güncelle
+      const player = document.getElementById('video-player');
+      player.src = getYouTubeEmbedUrl(video.video_url);
+
+      // Video bilgilerini güncelle
+      const bilgiDiv = document.getElementById('video-detay-bilgi');
+      bilgiDiv.innerHTML = `
+        ${video.aciklama ? `
+          <div class="bg-white bg-opacity-10 rounded-lg p-4">
+            <div class="text-amber-400 font-semibold mb-1">📝 Açıklama</div>
+            <div class="text-white">${video.aciklama}</div>
+          </div>
+        ` : ''}
+        <div class="bg-white bg-opacity-10 rounded-lg p-4">
+          <div class="text-amber-400 font-semibold mb-1">👤 Yükleyen</div>
+          <div class="text-white">${video.yukleyen}</div>
+        </div>
+        <div class="bg-white bg-opacity-10 rounded-lg p-4">
+          <div class="text-amber-400 font-semibold mb-1">📅 Yüklenme Tarihi</div>
+          <div class="text-white">${formatTarihSaat(video.yuklenme_tarihi)}</div>
+        </div>
+      `;
+
+      // Yorumları ve ilgili videoları render et
+      renderVideoComments(videoId);
+      renderIlgiliVideolar(videoId);
+
+      // Sayfayı göster
+      showPage('video-detay');
+    }
+
+    function renderVideoComments(videoId) {
+      const videoComments = allVideoComments.filter(c => c.video_id === videoId);
+      const tbody = document.getElementById('video-yorumlar-tbody');
+      const yorumSayisi = document.getElementById('video-yorum-sayisi');
+
+      if (!tbody || !yorumSayisi) return;
+
+      yorumSayisi.textContent = videoComments.length;
+
+      if (videoComments.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="px-6 py-12 text-center">
+              <div class="text-6xl mb-4">💬</div>
+              <p class="text-gray-300 text-lg">Henüz yorum yapılmamış.</p>
+              <p class="text-gray-400 text-sm mt-2">İlk yorumu siz yapın!</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      // Yorumları tarihe göre sırala (en yeni en üstte)
+      const sortedComments = [...videoComments].sort((a, b) =>
+        new Date(b.yorum_tarihi) - new Date(a.yorum_tarihi)
+      );
+
+      tbody.innerHTML = sortedComments.map((comment, index) => `
+        <tr class="border-t border-white border-opacity-10 hover:bg-white hover:bg-opacity-5 transition">
+          <td class="px-6 py-4 text-white font-semibold">${index + 1}</td>
+          <td class="px-6 py-4">
+            <div class="text-white">${comment.yorum}</div>
+          </td>
+          <td class="px-6 py-4 text-gray-300">${comment.yorumcu}</td>
+          <td class="px-6 py-4 text-gray-300 text-sm">${formatTarihSaat(comment.yorum_tarihi)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderIlgiliVideolar(currentVideoId) {
+      const container = document.getElementById('ilgili-videolar');
+      if (!container) return;
+
+      const otherVideos = allVideos.filter(v => v.id !== currentVideoId);
+
+      if (otherVideos.length === 0) {
+        container.innerHTML = '<p class="text-gray-300 text-sm">Başka video bulunmuyor.</p>';
+        return;
+      }
+
+      // En fazla 5 video göster
+      const displayVideos = otherVideos.slice(0, 5);
+
+      container.innerHTML = displayVideos.map(video => `
+        <div class="card-hover bg-white bg-opacity-10 rounded-lg overflow-hidden cursor-pointer group" onclick="showVideoDetay('${video.id}')">
+          <div class="aspect-video bg-white bg-opacity-20 overflow-hidden relative">
+            <img src="${video.thumbnail_url}" alt="${video.baslik}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onerror="this.src=''; this.style.display='none'; this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center text-4xl\\'>🎬</div>';">
+          </div>
+          <div class="p-3">
+            <h4 class="text-sm font-bold text-white line-clamp-2 mb-1" title="${video.baslik}">${video.baslik}</h4>
+            <p class="text-xs text-gray-400">${video.yukleyen}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.showVideoDetay = showVideoDetay;
+
+    function formatTarihSaat(isoString) {
+      const tarih = new Date(isoString);
+      const gun = String(tarih.getDate()).padStart(2, '0');
+      const ay = String(tarih.getMonth() + 1).padStart(2, '0');
+      const yil = tarih.getFullYear();
+      const saat = String(tarih.getHours()).padStart(2, '0');
+      const dakika = String(tarih.getMinutes()).padStart(2, '0');
+      const saniye = String(tarih.getSeconds()).padStart(2, '0');
+      
+      return `${gun}.${ay}.${yil} ${saat}:${dakika}:${saniye}`;
+    }
+
+    function renderForumMessages(messages, page) {
+      const tbody = document.getElementById('forum-tbody');
+      const mesajSayisiSpan = document.getElementById('forum-mesaj-sayisi');
+      const toplamMesajSpan = document.getElementById('toplam-mesaj');
+      const aktifSayfaSpan = document.getElementById('aktif-sayfa');
+      const toplamSayfaSpan = document.getElementById('toplam-sayfa');
+      
+      if (!tbody) return;
+
+      // Mesajları tarihe göre sırala (en yeni en üstte)
+      const sortedMessages = [...messages].sort((a, b) => 
+        new Date(b.mesaj_tarihi) - new Date(a.mesaj_tarihi)
+      );
+
+      const totalPages = Math.ceil(sortedMessages.length / messagesPerPage);
+      const startIndex = (page - 1) * messagesPerPage;
+      const endIndex = startIndex + messagesPerPage;
+      const pageMessages = sortedMessages.slice(startIndex, endIndex);
+
+      // Mesaj sayısını güncelle
+      if (mesajSayisiSpan) mesajSayisiSpan.textContent = sortedMessages.length;
+      if (toplamMesajSpan) toplamMesajSpan.textContent = sortedMessages.length;
+      if (aktifSayfaSpan) aktifSayfaSpan.textContent = page;
+      if (toplamSayfaSpan) toplamSayfaSpan.textContent = totalPages || 1;
+
+      if (sortedMessages.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-6 py-12 text-center">
+              <div class="text-6xl mb-4">💬</div>
+              <p class="text-gray-300 text-lg">Henüz forum mesajı bulunmuyor.</p>
+              <p class="text-gray-400 text-sm mt-2">İlk mesajı siz paylaşın!</p>
+            </td>
+          </tr>
+        `;
+        renderPagination(0, page);
+        return;
+      }
+
+      tbody.innerHTML = pageMessages.map((msg, index) => {
+        const globalIndex = startIndex + index + 1;
+        const adminButtons = (loggedInUser && loggedInUser.is_admin) ? `
+          <div class="flex space-x-2 mt-2">
+            <button onclick="editForumMessage('${msg.__backendId}')" class="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">
+              ✏️ Düzenle
+            </button>
+            <button onclick="deleteForumMessage('${msg.__backendId}')" class="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
+              🗑️ Sil
+            </button>
+          </div>
+        ` : '';
+        
+        return `
+          <tr class="border-t border-white border-opacity-10 hover:bg-white hover:bg-opacity-5 transition">
+            <td class="px-6 py-4 text-white font-semibold">${globalIndex}</td>
+            <td class="px-6 py-4">
+              <div class="text-white font-bold mb-1">${msg.baslik}</div>
+              <div class="text-gray-300 text-sm line-clamp-2">${msg.mesaj}</div>
+              ${adminButtons}
+            </td>
+            <td class="px-6 py-4 text-gray-300">${msg.yazar}</td>
+            <td class="px-6 py-4 text-gray-300 text-sm">${formatTarihSaat(msg.mesaj_tarihi)}</td>
+            <td class="px-6 py-4 text-amber-400 font-semibold">${msg.yorum_sayisi || 0}</td>
+          </tr>
+        `;
+      }).join('');
+
+      renderPagination(totalPages, page);
+    }
+
+    function renderPagination(totalPages, currentPageNum) {
+      const container = document.getElementById('sayfalama-butonlari');
+      if (!container) return;
+
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let buttons = [];
+
+      // Önceki butonu
+      if (currentPageNum > 1) {
+        buttons.push(`
+          <button onclick="changePage(${currentPageNum - 1})" class="px-4 py-2 bg-white bg-opacity-10 text-white rounded-lg hover:bg-opacity-20 transition">
+            ← Önceki
+          </button>
+        `);
+      }
+
+      // Sayfa numaraları
+      const maxButtons = 5;
+      let startPage = Math.max(1, currentPageNum - Math.floor(maxButtons / 2));
+      let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+
+      if (endPage - startPage < maxButtons - 1) {
+        startPage = Math.max(1, endPage - maxButtons + 1);
+      }
+
+      if (startPage > 1) {
+        buttons.push(`
+          <button onclick="changePage(1)" class="px-4 py-2 bg-white bg-opacity-10 text-white rounded-lg hover:bg-opacity-20 transition">
+            1
+          </button>
+        `);
+        if (startPage > 2) {
+          buttons.push(`<span class="px-2 text-gray-400">...</span>`);
+        }
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        if (i === currentPageNum) {
+          buttons.push(`
+            <button class="px-4 py-2 bg-amber-400 text-blue-900 rounded-lg font-bold">
+              ${i}
+            </button>
+          `);
+        } else {
+          buttons.push(`
+            <button onclick="changePage(${i})" class="px-4 py-2 bg-white bg-opacity-10 text-white rounded-lg hover:bg-opacity-20 transition">
+              ${i}
+            </button>
+          `);
+        }
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          buttons.push(`<span class="px-2 text-gray-400">...</span>`);
+        }
+        buttons.push(`
+          <button onclick="changePage(${totalPages})" class="px-4 py-2 bg-white bg-opacity-10 text-white rounded-lg hover:bg-opacity-20 transition">
+            ${totalPages}
+          </button>
+        `);
+      }
+
+      // Sonraki butonu
+      if (currentPageNum < totalPages) {
+        buttons.push(`
+          <button onclick="changePage(${currentPageNum + 1})" class="px-4 py-2 bg-white bg-opacity-10 text-white rounded-lg hover:bg-opacity-20 transition">
+            Sonraki →
+          </button>
+        `);
+      }
+
+      container.innerHTML = buttons.join('');
+    }
+
+    function changePage(page) {
+      currentPage = page;
+      renderForumMessages(allForumMessages, page);
+      
+      // Sayfayı yukarı kaydır
+      const forumSection = document.getElementById('page-forum');
+      if (forumSection) {
+        forumSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    // Global fonksiyon olarak tanımla
+    window.changePage = changePage;
+
+    // Admin fonksiyonları
+    function renderAdminUsers(users) {
+      const tbody = document.getElementById('admin-users-tbody');
+      if (!tbody) return;
+
+      if (users.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-6 py-12 text-center text-gray-300">
+              Henüz kayıtlı kullanıcı bulunmuyor.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = users.map(user => `
+        <tr class="border-t border-white border-opacity-10 hover:bg-white hover:bg-opacity-5 transition">
+          <td class="px-6 py-4 text-white">${user.ad_soyad}</td>
+          <td class="px-6 py-4 text-gray-300">${user.email}</td>
+          <td class="px-6 py-4">
+            <span class="px-3 py-1 rounded-full text-sm font-semibold ${user.is_admin ? 'bg-amber-400 text-blue-900' : 'bg-gray-600 text-white'}">
+              ${user.is_admin ? '👑 Admin' : '👤 Kullanıcı'}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-gray-300 text-sm">${formatTarihSaat(user.kayit_tarihi)}</td>
+          <td class="px-6 py-4">
+            <div class="flex space-x-2">
+              ${!user.is_admin ? `
+                <button onclick="makeAdmin('${user.__backendId}')" class="bg-amber-400 text-blue-900 px-3 py-1 rounded text-sm font-semibold hover:bg-amber-300 transition">
+                  👑 Admin Yap
+                </button>
+              ` : `
+                <button onclick="removeAdmin('${user.__backendId}')" class="bg-gray-600 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-gray-700 transition">
+                  👤 Normal Kullanıcı Yap
+                </button>
+              `}
+              <button onclick="deleteUser('${user.__backendId}')" class="bg-red-500 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-red-600 transition">
+                🗑️ Sil
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderAdminMessages(messages) {
+      const tbody = document.getElementById('admin-messages-tbody');
+      if (!tbody) return;
+
+      if (messages.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="px-6 py-12 text-center text-gray-300">
+              Henüz forum mesajı bulunmuyor.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const sortedMessages = [...messages].sort((a, b) => 
+        new Date(b.mesaj_tarihi) - new Date(a.mesaj_tarihi)
+      );
+
+      tbody.innerHTML = sortedMessages.map(msg => `
+        <tr class="border-t border-white border-opacity-10 hover:bg-white hover:bg-opacity-5 transition">
+          <td class="px-6 py-4">
+            <div class="text-white font-bold">${msg.baslik}</div>
+            <div class="text-gray-300 text-sm mt-1 line-clamp-2">${msg.mesaj}</div>
+          </td>
+          <td class="px-6 py-4 text-gray-300">${msg.yazar}</td>
+          <td class="px-6 py-4 text-gray-300 text-sm">${formatTarihSaat(msg.mesaj_tarihi)}</td>
+          <td class="px-6 py-4">
+            <div class="flex space-x-2">
+              <button onclick="editForumMessage('${msg.__backendId}')" class="bg-blue-500 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-blue-600 transition">
+                ✏️ Düzenle
+              </button>
+              <button onclick="deleteForumMessage('${msg.__backendId}')" class="bg-red-500 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-red-600 transition">
+                🗑️ Sil
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function makeAdmin(backendId) {
+      const user = allUsers.find(u => u.__backendId === backendId);
+      if (!user) return;
+
+      user.is_admin = true;
+      const result = await window.dataSdk.update(user);
+
+      if (result.isOk) {
+        showToast('✓ Kullanıcı admin yapıldı!');
+      } else {
+        showToast('❌ İşlem başarısız oldu.');
+      }
+    }
+
+    async function removeAdmin(backendId) {
+      const user = allUsers.find(u => u.__backendId === backendId);
+      if (!user) return;
+
+      user.is_admin = false;
+      const result = await window.dataSdk.update(user);
+
+      if (result.isOk) {
+        showToast('✓ Admin yetkisi kaldırıldı!');
+      } else {
+        showToast('❌ İşlem başarısız oldu.');
+      }
+    }
+
+    async function deleteUser(backendId) {
+      const user = allUsers.find(u => u.__backendId === backendId);
+      if (!user) return;
+
+      // İki aşamalı silme onayı
+      const confirmBtn = event.target;
+      if (!confirmBtn.classList.contains('confirm-delete')) {
+        confirmBtn.classList.add('confirm-delete');
+        confirmBtn.textContent = '⚠️ Emin misiniz?';
+        confirmBtn.style.backgroundColor = '#dc2626';
+        
+        setTimeout(() => {
+          confirmBtn.classList.remove('confirm-delete');
+          confirmBtn.textContent = '🗑️ Sil';
+          confirmBtn.style.backgroundColor = '';
+        }, 3000);
+        return;
+      }
+
+      const result = await window.dataSdk.delete(user);
+
+      if (result.isOk) {
+        showToast('✓ Kullanıcı silindi!');
+      } else {
+        showToast('❌ Silme işlemi başarısız oldu.');
+      }
+    }
+
+    async function editForumMessage(backendId) {
+      const message = allForumMessages.find(m => m.__backendId === backendId);
+      if (!message) return;
+
+      const newBaslik = window.prompt('Yeni başlık:', message.baslik);
+      if (newBaslik === null) return;
+
+      const newMesaj = window.prompt('Yeni mesaj:', message.mesaj);
+      if (newMesaj === null) return;
+
+      message.baslik = newBaslik;
+      message.mesaj = newMesaj;
+
+      const result = await window.dataSdk.update(message);
+
+      if (result.isOk) {
+        showToast('✓ Mesaj güncellendi!');
+      } else {
+        showToast('❌ Güncelleme başarısız oldu.');
+      }
+    }
+
+    async function deleteForumMessage(backendId) {
+      const message = allForumMessages.find(m => m.__backendId === backendId);
+      if (!message) return;
+
+      // İki aşamalı silme onayı
+      const confirmBtn = event.target;
+      if (!confirmBtn.classList.contains('confirm-delete')) {
+        confirmBtn.classList.add('confirm-delete');
+        confirmBtn.textContent = '⚠️ Emin misiniz?';
+        confirmBtn.style.backgroundColor = '#dc2626';
+        
+        setTimeout(() => {
+          confirmBtn.classList.remove('confirm-delete');
+          confirmBtn.textContent = '🗑️ Sil';
+          confirmBtn.style.backgroundColor = '';
+        }, 3000);
+        return;
+      }
+
+      const result = await window.dataSdk.delete(message);
+
+      if (result.isOk) {
+        showToast('✓ Mesaj silindi!');
+      } else {
+        showToast('❌ Silme işlemi başarısız oldu.');
+      }
+    }
+
+    // Global fonksiyonlar
+    window.makeAdmin = makeAdmin;
+    window.removeAdmin = removeAdmin;
+    window.deleteUser = deleteUser;
+    window.editForumMessage = editForumMessage;
+    window.deleteForumMessage = deleteForumMessage;
+
+    function updateAdminUI() {
+      const adminPanelLink = document.getElementById('admin-panel-link');
+      const adminPanelLinkMobile = document.getElementById('admin-panel-link-mobile');
+      const logoutBtn = document.getElementById('logout-btn');
+
+      if (loggedInUser) {
+        if (loggedInUser.is_admin) {
+          if (adminPanelLink) adminPanelLink.style.display = 'block';
+          if (adminPanelLinkMobile) adminPanelLinkMobile.style.display = 'block';
+        }
+        if (logoutBtn) logoutBtn.style.display = 'block';
+      } else {
+        if (adminPanelLink) adminPanelLink.style.display = 'none';
+        if (adminPanelLinkMobile) adminPanelLinkMobile.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+      }
+    }
+
+    // Navigation functionality
+    function showPage(pageName) {
+      document.querySelectorAll('.page-content').forEach(page => {
+        page.classList.remove('active');
+      });
+      
+      const targetPage = document.getElementById(`page-${pageName}`);
+      if (targetPage) {
+        targetPage.classList.add('active');
+      }
+
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+
+      const activeLink = document.querySelector(`.nav-link[data-page="${pageName}"]`);
+      if (activeLink) {
+        activeLink.classList.add('active');
+      }
+
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.remove('open');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.showPage = showPage;
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const pageName = link.getAttribute('data-page');
+        showPage(pageName);
+      });
+    });
+
+    document.querySelectorAll('.nav-link-mobile').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const pageName = link.getAttribute('data-page');
+        showPage(pageName);
+      });
+    });
+
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.toggle('open');
+    });
+
+    document.querySelectorAll('.feature-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const pageName = card.getAttribute('data-navigate');
+        if (pageName) {
+          showPage(pageName);
+        }
+      });
+    });
+
+    // Çıkış butonu
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        loggedInUser = null;
+        updateAdminUI();
+        showToast('✓ Çıkış yapıldı!');
+        showPage('anasayfa');
+      });
+    }
+
+    // Form submissions
+    document.getElementById('kayit-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const totalRecords = allUsers.length + allForumMessages.length + allComments.length;
+      if (totalRecords >= 999) {
+        showToast('⚠️ Maksimum 999 kayıt limitine ulaşıldı!');
+        return;
+      }
+
+      const kayitBtn = document.getElementById('kayit-btn');
+      const originalText = kayitBtn.innerHTML;
+      kayitBtn.innerHTML = '<div class="loading-spinner"></div>Kaydediliyor...';
+      kayitBtn.disabled = true;
+
+      const hobilerCheckboxes = document.querySelectorAll('input[name="hobiler"]:checked');
+      const hobiler = Array.from(hobilerCheckboxes).map(cb => cb.value).join(', ');
+
+      const email = document.getElementById('email').value;
+      const isAdmin = email.toLowerCase().includes('admin');
+
+      const userData = {
+        id: 'user_' + Date.now(),
+        type: 'user',
+        ad_soyad: document.getElementById('ad-soyad').value,
+        email: email,
+        sifre: document.getElementById('sifre').value,
+        cinsiyet: document.querySelector('input[name="cinsiyet"]:checked').value,
+        dogum_tarihi: document.getElementById('dogum-tarihi').value || '',
+        sehir: document.getElementById('sehir').value,
+        meslek: document.getElementById('meslek').value || '',
+        sirket: document.getElementById('sirket').value || '',
+        telefon: document.getElementById('telefon').value || '',
+        hobiler: hobiler,
+        biyografi: document.getElementById('biyografi').value || '',
+        sosyal_medya: document.getElementById('sosyal-medya').value || '',
+        haber_bulteni: document.getElementById('haber-bulteni').checked,
+        gizlilik: document.getElementById('gizlilik').checked,
+        kayit_tarihi: new Date().toISOString(),
+        is_admin: isAdmin
+      };
+
+      const result = await window.dataSdk.create(userData);
+
+      kayitBtn.innerHTML = originalText;
+      kayitBtn.disabled = false;
+
+      if (result.isOk) {
+        showToast(isAdmin ? '✓ Kayıt başarılı! Admin olarak kaydedildiniz.' : '✓ Kayıt başarılı! Hoş geldiniz.');
+        document.getElementById('kayit-form').reset();
+        setTimeout(() => {
+          showPage('kisiler');
+        }, 1500);
+      } else {
+        showToast('❌ Kayıt sırasında bir hata oluştu.');
+      }
+    });
+
+    document.getElementById('giris-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('giris-email').value;
+      const sifre = document.getElementById('giris-sifre').value;
+
+      const user = allUsers.find(u => u.email === email && u.sifre === sifre);
+
+      if (user) {
+        loggedInUser = user;
+        updateAdminUI();
+        showToast(`✓ Hoş geldiniz, ${user.ad_soyad}!`);
+        setTimeout(() => {
+          showPage('anasayfa');
+        }, 1500);
+      } else {
+        showToast('❌ Email veya şifre hatalı!');
+      }
+    });
+
+    document.getElementById('forum-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const totalRecords = allUsers.length + allForumMessages.length + allComments.length;
+      if (totalRecords >= 999) {
+        showToast('⚠️ Maksimum 999 kayıt limitine ulaşıldı!');
+        return;
+      }
+
+      const forumBtn = document.getElementById('forum-btn');
+      const originalText = forumBtn.innerHTML;
+      forumBtn.innerHTML = '<div class="loading-spinner"></div>Gönderiliyor...';
+      forumBtn.disabled = true;
+
+      const forumData = {
+        id: 'forum_' + Date.now(),
+        type: 'forum',
+        yazar: document.getElementById('forum-yazar').value,
+        baslik: document.getElementById('forum-baslik').value,
+        mesaj: document.getElementById('forum-mesaj').value,
+        mesaj_tarihi: new Date().toISOString(),
+        yorum_sayisi: 0
+      };
+
+      const result = await window.dataSdk.create(forumData);
+
+      forumBtn.innerHTML = originalText;
+      forumBtn.disabled = false;
+
+      if (result.isOk) {
+        showToast('✓ Mesajınız başarıyla paylaşıldı!');
+        document.getElementById('forum-form').reset();
+        currentPage = 1;
+      } else {
+        showToast('❌ Mesaj gönderilirken bir hata oluştu.');
+      }
+    });
+
+    document.getElementById('yorum-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!currentUser) {
+        showToast('❌ Bir hata oluştu. Lütfen sayfayı yenileyin.');
+        return;
+      }
+
+      const totalRecords = allUsers.length + allForumMessages.length + allComments.length;
+      if (totalRecords >= 999) {
+        showToast('⚠️ Maksimum 999 kayıt limitine ulaşıldı!');
+        return;
+      }
+
+      const yorumBtn = document.getElementById('yorum-btn');
+      const originalText = yorumBtn.innerHTML;
+      yorumBtn.innerHTML = '<div class="loading-spinner"></div>Gönderiliyor...';
+      yorumBtn.disabled = true;
+
+      const commentData = {
+        id: 'comment_' + Date.now(),
+        type: 'comment',
+        kisi_id: currentUser.id,
+        yorumcu: document.getElementById('yorumcu-adi').value,
+        yorum: document.getElementById('yorum-metni').value,
+        yorum_tarihi: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(commentData);
+
+      yorumBtn.innerHTML = originalText;
+      yorumBtn.disabled = false;
+
+      if (result.isOk) {
+        showToast('✓ Yorumunuz başarıyla eklendi!');
+        document.getElementById('yorum-form').reset();
+      } else {
+        showToast('❌ Yorum eklenirken bir hata oluştu.');
+      }
+    });
+
+    document.getElementById('fotograf-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const totalRecords = allUsers.length + allForumMessages.length + allComments.length + allPhotos.length + allPhotoTags.length + allPhotoComments.length + allVideos.length + allVideoComments.length;
+      if (totalRecords >= 999) {
+        showToast('⚠️ Maksimum 999 kayıt limitine ulaşıldı!');
+        return;
+      }
+
+      const fotografBtn = document.getElementById('fotograf-btn');
+      const originalText = fotografBtn.innerHTML;
+      fotografBtn.innerHTML = '<div class="loading-spinner"></div>Ekleniyor...';
+      fotografBtn.disabled = true;
+
+      const photoData = {
+        id: 'photo_' + Date.now(),
+        type: 'photo',
+        baslik: document.getElementById('fotograf-baslik').value,
+        fotograf_url: document.getElementById('fotograf-url').value,
+        aciklama: document.getElementById('fotograf-aciklama').value || '',
+        yukleyen: document.getElementById('fotograf-yukleyen').value,
+        yuklenme_tarihi: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(photoData);
+
+      fotografBtn.innerHTML = originalText;
+      fotografBtn.disabled = false;
+
+      if (result.isOk) {
+        showToast('✓ Fotoğraf başarıyla eklendi!');
+        document.getElementById('fotograf-form').reset();
+      } else {
+        showToast('❌ Fotoğraf eklenirken bir hata oluştu.');
+      }
+    });
+
+    document.getElementById('video-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const totalRecords = allUsers.length + allForumMessages.length + allComments.length + allPhotos.length + allPhotoTags.length + allPhotoComments.length + allVideos.length + allVideoComments.length;
+      if (totalRecords >= 999) {
+        showToast('⚠️ Maksimum 999 kayıt limitine ulaşıldı!');
+        return;
+      }
+
+      const videoBtn = document.getElementById('video-btn');
+      const originalText = videoBtn.innerHTML;
+      videoBtn.innerHTML = '<div class="loading-spinner"></div>Ekleniyor...';
+      videoBtn.disabled = true;
+
+      const videoData = {
+        id: 'video_' + Date.now(),
+        type: 'video',
+        baslik: document.getElementById('video-baslik').value,
+        video_url: document.getElementById('video-url').value,
+        thumbnail_url: document.getElementById('video-thumbnail').value,
+        aciklama: document.getElementById('video-aciklama').value || '',
+        yukleyen: document.getElementById('video-yukleyen').value,
+        yuklenme_tarihi: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(videoData);
+
+      videoBtn.innerHTML = originalText;
+      videoBtn.disabled = false;
+
+      if (result.isOk) {
+        showToast('✓ Video başarıyla eklendi!');
+        document.getElementById('video-form').reset();
+      } else {
+        showToast('❌ Video eklenirken bir hata oluştu.');
+      }
+    });
+
+    const kisiArama = document.getElementById('kisi-arama');
+    if (kisiArama) {
+      kisiArama.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredUsers = allUsers.filter(user => 
+          user.ad_soyad.toLowerCase().includes(searchTerm) ||
+          user.meslek.toLowerCase().includes(searchTerm) ||
+          user.sehir.toLowerCase().includes(searchTerm)
+        );
+        renderKisiler(filteredUsers);
+      });
+    }
+
+    // Video yorum formu
+    document.getElementById('video-yorum-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!currentVideo) {
+        showToast('❌ Bir hata oluştu. Lütfen sayfayı yenileyin.');
+        return;
+      }
+
+      const totalRecords = allUsers.length + allForumMessages.length + allComments.length + allPhotos.length + allPhotoTags.length + allPhotoComments.length + allVideos.length + allVideoComments.length;
+      if (totalRecords >= 999) {
+        showToast('⚠️ Maksimum 999 kayıt limitine ulaşıldı!');
+        return;
+      }
+
+      const yorumBtn = document.getElementById('video-yorum-btn');
+      const originalText = yorumBtn.innerHTML;
+      yorumBtn.innerHTML = '<div class="loading-spinner"></div>Gönderiliyor...';
+      yorumBtn.disabled = true;
+
+      const commentData = {
+        id: 'video_comment_' + Date.now(),
+        type: 'video_comment',
+        video_id: currentVideo.id,
+        yorumcu: document.getElementById('video-yorumcu').value,
+        yorum: document.getElementById('video-yorum-metni').value,
+        yorum_tarihi: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(commentData);
+
+      yorumBtn.innerHTML = originalText;
+      yorumBtn.disabled = false;
+
+      if (result.isOk) {
+        showToast('✓ Yorumunuz başarıyla eklendi!');
+        document.getElementById('video-yorum-form').reset();
+      } else {
+        showToast('❌ Yorum eklenirken bir hata oluştu.');
+      }
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a960e01026dd5ef',t:'MTc2NDk2NDA0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
